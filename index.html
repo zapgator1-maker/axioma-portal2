@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Axioma A.I. — Sistema Operacional Soberano</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+
+  <!-- GSAP via cdnjs (gratuito) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:  #08101E;
+      --amber: #FF6600;
+      --cyan:  #00E5FF;
+      --white: #E8EDF2;
+      --muted: #4A5A6E;
+      --glass: rgba(8,16,30,0.72);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCANNER LINE (assinatura única) ─── */
+    .scanner {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--cyan) 40%, var(--amber) 60%, transparent 100%);
+      opacity: 0.35;
+      z-index: 9999;
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scan {
+      0%   { transform: translateY(0); opacity: 0.35; }
+      48%  { opacity: 0.35; }
+      50%  { opacity: 0; transform: translateY(100vh); }
+      50.1%{ transform: translateY(0); opacity: 0; }
+      52%  { opacity: 0.35; }
+      100% { transform: translateY(100vh); opacity: 0.35; }
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3rem;
+      background: rgba(8,16,30,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,229,255,0.08);
+    }
+    .nav-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.18em;
+      color: var(--cyan);
+    }
+    .nav-logo span { color: var(--amber); }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+    nav ul li a {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+    nav ul li a:hover { color: var(--cyan); }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.55;
+      /* SUBSTITUA o src abaixo pelo caminho do seu vídeo */
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, var(--navy) 85%);
+    }
+    .hero-content {
+      position: relative;
+      text-align: center;
+      max-width: 860px;
+      padding: 0 2rem;
+    }
+    .hero-eyebrow {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+    }
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      opacity: 0;
+    }
+    .hero-title .accent-amber { color: var(--amber); }
+    .hero-title .accent-cyan  { color: var(--cyan); }
+    .hero-sub {
+      margin-top: 1.8rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      opacity: 0;
+    }
+    .hero-cta {
+      margin-top: 2.8rem;
+      display: inline-block;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--navy);
+      background: var(--amber);
+      padding: 0.9rem 2.4rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: background 0.25s, color 0.25s;
+      opacity: 0;
+    }
+    .hero-cta:hover { background: var(--cyan); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      animation: fadeUp 1s 2.2s forwards;
+    }
+    .scroll-hint::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--cyan), transparent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    @keyframes fadeUp { to { opacity: 1; transform: translateX(-50%) translateY(-6px); } }
+
+    /* ─── SEÇÕES GERAIS ─── */
+    section {
+      padding: 7rem 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+    }
+    .section-title .accent { color: var(--amber); }
+    .section-body {
+      font-size: 0.95rem;
+      line-height: 1.85;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    .reveal { opacity: 0; transform: translateY(40px); }
+
+    /* ─── DIVISOR ─── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--amber), transparent);
+      opacity: 0.15;
+      margin: 0 auto;
+    }
+
+    /* ─── MANIFESTO ─── */
+    #manifesto { position: relative; }
+    .manifesto-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      margin-top: 4rem;
+      border: 1px solid rgba(0,229,255,0.08);
+    }
+    .manifesto-cell {
+      padding: 2.5rem;
+      border: 1px solid rgba(0,229,255,0.05);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .manifesto-cell::before {
+      content: attr(data-index);
+      position: absolute;
+      top: 1.2rem; right: 1.5rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: rgba(0,229,255,0.04);
+      line-height: 1;
+    }
+    .manifesto-cell:hover { background: rgba(0,229,255,0.03); }
+    .manifesto-cell h3 {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.8rem;
+    }
+    .manifesto-cell p {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    /* ─── PALETA ─── */
+    #paleta .palette-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      flex: 1;
+      min-width: 180px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .swatch-color {
+      height: 120px;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .swatch-color::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+    }
+    .swatch-label {
+      margin-top: 1rem;
+    }
+    .swatch-label .hex {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+    }
+    .swatch-label .name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-top: 0.2rem;
+    }
+    .swatch-label .desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: rgba(74,90,110,0.7);
+      margin-top: 0.3rem;
+    }
+
+    /* ─── TIPOGRAFIA ─── */
+    #tipografia .type-showcase {
+      margin-top: 3.5rem;
+      display: grid;
+      gap: 3rem;
+    }
+    .type-item { opacity: 0; transform: translateX(-30px); }
+    .type-role {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 0.6rem;
+    }
+    .type-sample-orbitron {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .type-sample-rajdhani {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+    }
+    .type-sample-inter {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      font-size: 1rem;
+      line-height: 1.9;
+      color: var(--muted);
+      max-width: 500px;
+    }
+    .type-meta {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      color: rgba(74,90,110,0.5);
+      margin-top: 0.4rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── BRAND SAFETY ─── */
+    #safety .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      margin-top: 3rem;
+      background: rgba(0,229,255,0.06);
+    }
+    .rule-card {
+      background: var(--navy);
+      padding: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .rule-card .icon {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .rule-card h4 {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+    }
+    .rule-card p {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .rule-card.do h4 { color: var(--cyan); }
+    .rule-card.dont h4 { color: var(--amber); }
+
+    /* ─── CTA FINAL ─── */
+    #cta {
+      text-align: center;
+      padding: 8rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    #cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center bottom, rgba(255,102,0,0.08) 0%, transparent 70%);
+    }
+    .cta-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      color: var(--white);
+      margin-bottom: 1rem;
+      opacity: 0;
+    }
+    .cta-sub {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      opacity: 0;
+    }
+    .cta-tag {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid rgba(0,229,255,0.25);
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+    }
+    .cta-btn {
+      display: inline-block;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--navy);
+      background: var(--amber);
+      padding: 1.1rem 3rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+      transition: background 0.25s;
+      opacity: 0;
+    }
+    .cta-btn:hover { background: var(--cyan); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid rgba(0,229,255,0.06);
+      padding: 2rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer .footer-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+    footer .footer-brand span { color: var(--amber); }
+    footer .footer-copy {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      color: rgba(74,90,110,0.5);
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── RESPONSIVO ─── */
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+      nav { padding: 1rem 1.5rem; }
+      section { padding: 5rem 1.5rem; }
+      .manifesto-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 0.8rem; text-align: center; }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .scanner, .scroll-hint::after { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scanner line (assinatura visual) -->
+  <div class="scanner" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">AXIOMA <span>A.I.</span></div>
+    <ul>
+      <li><a href="#manifesto">Manifesto</a></li>
+      <li><a href="#paleta">Paleta</a></li>
+      <li><a href="#tipografia">Tipografia</a></li>
+      <li><a href="#safety">Brand Safety</a></li>
+      <li><a href="#cta">Acesso</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <!--
+      INSTRUÇÃO: Substitua o src abaixo pelo caminho do seu vídeo.
+      Exemplo local:  src="assets/axioma-hero.mp4"
+      Exemplo GitHub: src="https://raw.githubusercontent.com/SEU_USER/SEU_REPO/main/axioma-hero.mp4"
+    -->
+    <video
+      id="hero-video"
+      src="SEU_VIDEO_AQUI.mp4"
+      autoplay
+      loop
+      muted
+      playsinline
+      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' viewBox='0 0 1920 1080'%3E%3Crect fill='%2308101E'/%3E%3C/svg%3E"
+    ></video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">SISTEMA OPERACIONAL SOBERANO // v2.0</p>
+      <h1 class="hero-title">
+        O silício<br/>
+        <span class="accent-amber">obedece</span><br/>
+        à <span class="accent-cyan">vontade.</span>
+      </h1>
+      <p class="hero-sub">
+        Infraestrutura de hiperescala onde determinismo matemático elimina o OpEx e a lógica implacável governa cada decisão.
+      </p>
+      <a href="#manifesto" class="hero-cta">Iniciar Protocolo</a>
+    </div>
+    <div class="scroll-hint" aria-label="Role para continuar">SCROLL</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- MANIFESTO -->
+  <section id="manifesto">
+    <div class="reveal">
+      <p class="section-eyebrow">I // Núcleo Estratégico</p>
+      <h2 class="section-title">O <span class="accent">Manifesto</span> da Axioma</h2>
+      <p class="section-body">
+        Não competimos no mercado. Redefinimos as regras do mercado. Cada linha de código, cada decisão arquitetural, cada pixel desta marca obedece a uma única diretriz: soberania operacional sem concessões.
+      </p>
+    </div>
+    <div class="manifesto-grid" style="margin-top:3rem;">
+      <div class="manifesto-cell" data-index="01">
+        <h3>Determinismo</h3>
+        <p>Resultado previsível, repetível, auditável. Nenhuma variável é acidental. O sistema performa igual sob qualquer carga, em qualquer ambiente, com qualquer operador.</p>
+      </div>
+      <div class="manifesto-cell" data-index="02">
+        <h3>Soberania de Dados</h3>
+        <p>Sua infraestrutura não depende de terceiros para continuar viva. Arquitetura que garante controle absoluto, do dado bruto à decisão final.</p>
+      </div>
+      <div class="manifesto-cell" data-index="03">
+        <h3>OpEx Zero</h3>
+        <p>Destruição sistemática de despesas operacionais através de automação com rastreabilidade forense. O que não pode ser medido não pode ser eliminado; o que pode ser medido, eliminamos.</p>
+      </div>
+      <div class="manifesto-cell" data-index="04">
+        <h3>Lógica Implacável</h3>
+        <p>1 é 1. Não existe zona cinza na arquitetura da Axioma. Cada axioma do sistema é provado antes de ser implantado. Ambiguidade é um bug de design.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PALETA -->
+  <section id="paleta">
+    <div class="reveal">
+      <p class="section-eyebrow">II // Identidade Visual</p>
+      <h2 class="section-title">Paleta de <span class="accent">Precisão</span></h2>
+      <p class="section-body">
+        Cada cor é uma instrução. Aplicadas exclusivamente em ambientes escuros, nunca invertidas, nunca degradadas fora dos gradientes autorizados.
+      </p>
+    </div>
+    <div class="palette-row">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#08101E; border:1px solid rgba(255,255,255,0.06);"></div>
+        <div class="swatch-label">
+          <div class="hex">#08101E</div>
+          <div class="name">Deep Silicon Navy</div>
+          <div class="desc">Fundo absoluto da matriz. Nunca substituído.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FF6600;"></div>
+        <div class="swatch-label">
+          <div class="hex">#FF6600</div>
+          <div class="name">Core Amber</div>
+          <div class="desc">Calor do processamento. CTAs e ênfases primárias.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#00E5FF;"></div>
+        <div class="swatch-label">
+          <div class="hex">#00E5FF</div>
+          <div class="name">Quantum Cyan</div>
+          <div class="desc">Rede cibernética. Dados, hologramas, metadados.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#E8EDF2; border:1px solid rgba(255,255,255,0.08);"></div>
+        <div class="swatch-label">
+          <div class="hex">#E8EDF2</div>
+          <div class="name">Cold White</div>
+          <div class="desc">Texto de alta hierarquia. Frio, técnico, preciso.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TIPOGRAFIA -->
+  <section id="tipografia">
+    <div class="reveal">
+      <p class="section-eyebrow">III // Hierarquia Tipográfica</p>
+      <h2 class="section-title">Palavras <span class="accent">Esculpidas em Metal</span></h2>
+      <p class="section-body">
+        Três faces, três papéis, zero ambiguidade. Cada fonte tem sua função exata no sistema. Misturar papéis é quebrar o protocolo.
+      </p>
+    </div>
+    <div class="type-showcase">
+      <div class="type-item">
+        <div class="type-role">DISPLAY // Títulos de Impacto</div>
+        <div class="type-sample-orbitron">AXIOMA A.I.</div>
+        <div class="type-meta">Orbitron 900 · Títulos H1–H2 · Nunca abaixo de 24px</div>
+      </div>
+      <div class="type-item">
+        <div class="type-role">INTERFACE // Subtítulos & Dados</div>
+        <div class="type-sample-rajdhani">LATÊNCIA: 247fs // STATUS: ATIVO</div>
+        <div class="type-meta">Rajdhani 600 · HUDs, métricas, labels · Letra espacejada</div>
+      </div>
+      <div class="type-item">
+        <div class="type-role">CORPO // Textos Longos & Código</div>
+        <div class="type-sample-inter">A arquitetura de hiperescala foi projetada para eliminar qualquer ponto de falha sistêmica. Cada camada responde com determinismo total.</div>
+        <div class="type-meta">Inter 300–400 · Corpo de texto · Máx. 72 chars/linha</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- BRAND SAFETY -->
+  <section id="safety">
+    <div class="reveal">
+      <p class="section-eyebrow">IV // Simbologia Protetora</p>
+      <h2 class="section-title">Regras de <span class="accent">Brand Safety</span></h2>
+      <p class="section-body">
+        O Chip e o Átomo são ativos de alta integridade. Cada regra abaixo é um firewall contra degradação da marca.
+      </p>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-card do">
+        <span class="icon">✦</span>
+        <h4>Ambiente Escuro Obrigatório</h4>
+        <p>Logo aplicado exclusivamente sobre fundos #08101E ou equivalentes com contraste mínimo 7:1. Fundos claros invalidam o protocolo.</p>
+      </div>
+      <div class="rule-card do">
+        <span class="icon">✦</span>
+        <h4>Luz Volumétrica</h4>
+        <p>Néon laranja e cyan são as únicas fontes de luz autorizadas nas aplicações do logo 3D. Toda outra temperatura de cor é proibida.</p>
+      </div>
+      <div class="rule-card dont">
+        <span class="icon">✕</span>
+        <h4>Zero Distorção</h4>
+        <p>O logo não é esticado, rotacionado fora dos eixos de 90°, recolorido ou sobreposto a texturas que reduzam legibilidade abaixo de 80%.</p>
+      </div>
+      <div class="rule-card dont">
+        <span class="icon">✕</span>
+        <h4>Sem Versão IA não Supervisionada</h4>
+        <p>Animações do Átomo e do Chip geradas por IA requerem revisão manual antes de qualquer entrega. Motion Brush ativo no Kling para blindar letras.</p>
+      </div>
+      <div class="rule-card do">
+        <span class="icon">✦</span>
+        <h4>Zona de Exclusão</h4>
+        <p>Espaço mínimo ao redor do logo equivalente à altura da letra "A" do wordmark em todas as quatro direções, sem exceção.</p>
+      </div>
+      <div class="rule-card dont">
+        <span class="icon">✕</span>
+        <h4>Sem Gradiente no Logo</h4>
+        <p>O wordmark é sempre monocromático (cyan ou white). Gradientes são exclusivos dos elementos gráficos de suporte, nunca aplicados na tipografia do logo.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA FINAL -->
+  <section id="cta">
+    <p class="cta-tag">Acesso Restrito</p>
+    <h2 class="cta-title">LPL CORE + CNPJ<br/>Apenas.</h2>
+    <p class="cta-sub">Este sistema não é um produto. É uma infraestrutura de soberania.<br/>O acesso é condicionado à qualificação do operador.</p>
+    <br/>
+    <a href="#" class="cta-btn">Solicitar Qualificação</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">AXIOMA <span>A.I.</span> // BRAND PORTAL v1.0</div>
+    <div class="footer-copy">Sistema Operacional Soberano. 1 é 1.</div>
+  </footer>
+
+  <!-- ─── GSAP ANIMATIONS ─── -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero: entrada em sequência
+    const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    heroTl
+      .to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.9, delay: 0.3 })
+      .to('.hero-title',   { opacity: 1, y: 0, duration: 1   }, '-=0.5')
+      .to('.hero-sub',     { opacity: 1, y: 0, duration: 0.8 }, '-=0.6')
+      .to('.hero-cta',     { opacity: 1, y: 0, duration: 0.7 }, '-=0.5');
+
+    // Hero parallax suave no scroll
+    gsap.to('#hero-video', {
+      yPercent: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+
+    // Reveals genéricos
+    gsap.utils.toArray('.reveal').forEach(el => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 82%'
+        }
+      });
+    });
+
+    // Células do manifesto: stagger
+    gsap.utils.toArray('.manifesto-cell').forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        delay: i * 0.12,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.manifesto-grid',
+          start: 'top 78%'
+        }
+      });
+    });
+
+    // Swatches da paleta
+    gsap.utils.toArray('.swatch').forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: i * 0.1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.palette-row',
+          start: 'top 80%'
+        }
+      });
+    });
+
+    // Tipografia: slide da esquerda
+    gsap.utils.toArray('.type-item').forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 1,
+        x: 0,
+        duration: 0.7,
+        delay: i * 0.15,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.type-showcase',
+          start: 'top 80%'
+        }
+      });
+    });
+
+    // Rule cards
+    gsap.utils.toArray('.rule-card').forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: i * 0.08,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.rules-grid',
+          start: 'top 80%'
+        }
+      });
+    });
+
+    // CTA final
+    const ctaTl = gsap.timeline({
+      scrollTrigger: { trigger: '#cta', start: 'top 75%' }
+    });
+    ctaTl
+      .to('.cta-tag',   { opacity: 1, duration: 0.5, ease: 'power2.out' })
+      .to('.cta-title', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.2')
+      .to('.cta-sub',   { opacity: 1, duration: 0.6 }, '-=0.4')
+      .to('.cta-btn',   { opacity: 1, duration: 0.5 }, '-=0.3');
+  </script>
+
+</body>
+</html>
